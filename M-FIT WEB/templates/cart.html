@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>購物車</title>
+    <link rel="stylesheet" href="../static/css/cart.css">
+    <script src="../static/js/jquery.min.js" type="text/javascript"></script>
+    <script src="../static/js/common.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        document.onclick = function () {
+            var obj = event.srcElement || event.target;
+            if (obj.tagName == "INPUT" && obj.className == "del_cart") {
+                var cart_id = obj.id.split("_")[0];
+                var h_tr = cart_id + '_tr';
+                document.getElementById(h_tr).style.display = 'none';
+                DelCart(cart_id);
+            }
+            if (obj.innerText == "－" && obj.className == "edit_num") {
+                obj.nextSibling.value =parseInt(obj.nextSibling.value) - 1 
+                if (obj.nextSibling.value < 0) {
+                    obj.nextSibling.value = 0
+                }
+                updateCart()
+            }
+            if (obj.innerText == "＋" && obj.className == "edit_num") {
+                obj.previousSibling.value = parseInt(obj.previousSibling.value) + 1
+                if (obj.previousSibling.value > 10) {
+                    obj.previousSibling.value = 10
+                }
+                updateCart()
+            }
+        }
+    </script>
+    <script charset="utf-8">
+        var html_body = '';
+        token = window.localStorage.getItem('mfit_token'); //獲取token
+        username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+        cart_list = window.localStorage.getItem('mfit_cartlist');//獲取購物車清單
+        var post_data = { 'cart_list': cart_list }
+        var old_list = []
+
+        $.ajax({
+            type: "post",
+            url: "http://127.0.0.1:8000/v1/index",
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(post_data),
+            beforeSend: function (request) {
+                request.setRequestHeader("Authorization", token);
+            },
+            success: function (result) {
+                if (result.code == 200) {
+                    var mycart = result.data.my_cart
+
+                    header_html = makeHeader(result.token)
+                    html_body += header_html;
+                    html_body += '<main>';
+                    html_body += '<div id="cart_list">';
+                    html_body += '<h1>您的購物車</h1>';
+                    html_body += '<table><tr>';
+                    html_body += '<th style="width: 50px;">項次</th>';
+                    html_body += '<th style="width: 200px;">圖片</th>';
+                    html_body += '<th style="width: 350px;">商品名稱</th>';
+                    html_body += '<th style="width: 100px;">尺寸</th>';
+                    html_body += '<th style="width: 120px;">售價</th>';
+                    html_body += '<th style="width: 140px;">數量</th>';
+                    html_body += '<th style="width: 120px;">小計</th>';
+                    html_body += '<th></th></tr>';
+                    for (var i in mycart) {
+                        var cart_id = mycart[i].cart_id
+                        var item_id = mycart[i].item_id
+                        var pic = mycart[i].item_pic
+                        var name = mycart[i].item_name
+                        var size = mycart[i].item_size
+                        var price = mycart[i].item_price
+                        var num = mycart[i].item_num
+                        var a = parseInt(i) + 1
+                        if (result.token) {
+                            html_body += '<tr id="' + cart_id + '_tr"><td>' + a + '</td>';
+                        }
+                        else {
+                            html_body += '<tr id="' + i + '_tr"><td>' + a + '</td>';
+                        }
+                        html_body += '<td><img src="http://127.0.0.1:8000/media/' + pic + '"></td>';
+                        html_body += '<td>' + name + '</td>';
+                        html_body += '<td><strong>-' + size + '-</strong></td>';
+                        html_body += '<td><strong>NT$ ' + price + '</strong></td>';
+                        if (result.token) {
+                            html_body += '<td><b class="edit_num">－</b><input type="text" id="' + cart_id + '_item_num" value="' + num + '" class="item_num" onblur="updateCart()"><b class="edit_num">＋</b></td>';
+                            html_body += '<td><strong>NT$ ' + (price.replace(/,/g, "") * num).toLocaleString() + '</strong></td>';
+                            html_body += '<td><input type="button" id="' + cart_id + '_cancel"value="刪除" class="del_cart"></td></tr>';
+                            var a = Array.of(cart_id, num)
+                            old_list.push(a)
+                        }
+                        else {
+                            html_body += '<td><b class="edit_num">－</b><input type="text" id="' + i + '_item_num" value="' + num + '" class="item_num" onblur="updateCart()"><b class="edit_num">＋</b></td>';
+                            html_body += '<td><strong>NT$ ' + (price.replace(/,/g, "") * num).toLocaleString() + '</strong></td>';
+                            html_body += '<td><input type="button" id="' + i + '_cancel"value="取消" class="del_cart"></td></tr>';
+                            var a = Array.of(i, num)
+                            old_list.push(a)
+                        }
+                    }
+                    // console.log(old_list)
+                    html_body += '</table></div>';
+                    html_body += '<div id="check_out_block">';
+                    if (mycart.length == 0) {
+                        html_body += '<h4>您的購物車目前還是空的。</h4>';
+                    }
+                    html_body += '<hr><h3>總額：<strong>' + totalAmount(mycart).toLocaleString() + '</strong>元</h3>';
+                    if (mycart.length == 0) {
+                        html_body += '<a href="#" id="check_out" onclick=alert("購物車目前為空")>結帳</a>';
+                    }
+                    else {
+                        html_body += '<a href="/check_out" id="check_out">結帳</a>';
+                    }
+                    html_body += '</div></main>';
+                    $('body').html(html_body);
+                    if (result.token) {
+                        window.localStorage.removeItem('mfit_cartlist');
+                    }
+                }
+                else if (result.code == 403) {
+                    alert(result.error)
+                    window.location.href = 'http://127.0.0.1:5000/login';
+                }
+                else if (result.code == 10408){
+                        alert("『" + result.no_active + "』已下架")
+                        window.location.reload()
+                    }
+                else {
+                    alert(result.error)
+                }
+            }
+        });
+        function totalAmount(mycart) {
+            var total_amount = 0;
+            for (var i in mycart) {
+                var item_price = mycart[i].item_price
+                var price = item_price.replace(/,/g, "")
+                var num = parseInt(mycart[i].item_num)
+                total_amount = total_amount + (price * num)
+            }
+            return total_amount
+        };
+        // 修改購物車數量
+        function updateCart() {
+            token = window.localStorage.getItem('mfit_token'); //獲取token
+            username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+            cart_list = window.localStorage.getItem('mfit_cartlist');//獲取購物車清單
+            new_list = []
+            var post_data = { 'new_list': new_list, 'cart_list': cart_list }
+            function compareNum() {
+                if (cart_list) {
+                    for (var a = 0; a < old_list.length; a++) {
+                        var i = old_list[a][0]
+                        var num = old_list[a][1]
+                        var new_item_num = i + '_item_num'
+                        var new_num = document.getElementById(new_item_num).value;
+                        if (new_num != num) {
+                            b = Array.of(i, new_num)
+                            new_list.push(b)
+                        }
+                    }
+                }
+                else {
+                    for (var i = 0; i < old_list.length; i++) {
+                        var cart_id = old_list[i][0]
+                        var num = old_list[i][1]
+                        var new_item_num = cart_id + '_item_num'
+                        var new_num = document.getElementById(new_item_num).value;
+                        if (new_num != num) {
+                            a = Array.of(cart_id, new_num)
+                            new_list.push(a)
+                        }
+                    }
+                }
+            }
+            compareNum()
+            if (new_list.length == 0) {
+                return false
+            }
+            // console.log(new_list)
+            $.ajax({
+                type: "put",
+                contentType: "application/json",
+                dataType: "json",
+                url: "http://127.0.0.1:8000/v1/index/cart/update",
+                data: JSON.stringify(post_data),
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", token);
+                },
+                success: function (result) {
+                    if (result.code == 200) {
+                        // alert('成功')
+                        window.location.reload()
+                    }
+                    else if (result.code == 201) {
+                        // alert('成功')
+                        window.localStorage.setItem('mfit_cartlist', JSON.stringify(result.data.cart_list));
+                        window.location.reload()
+                    }
+                    else if (result.code == 403) {
+                        alert(result.error)
+                        window.location.href = 'http://127.0.0.1:5000/login';
+                    }
+                    else {
+                        alert(result.error)
+                        // window.location.reload()
+                    }
+                }
+            })
+        };
+        // 刪除購物車內容
+        function DelCart(cart_id) {
+            token = window.localStorage.getItem('mfit_token'); //獲取token
+            username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+            cart_list = window.localStorage.getItem('mfit_cartlist');//獲取購物車清單
+            var post_data = { 'cart_id': cart_id, 'cart_list': cart_list }; //獲取購物車清單id
+
+            $.ajax({
+                type: "delete",
+                contentType: "application/json",
+                dataType: "json",
+                url: "http://127.0.0.1:8000/v1/index/cart",
+                data: JSON.stringify(post_data),
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", token);
+                },
+                success: function (result) {
+                    if (result.code == 200) {
+                        alert('已刪除！')
+                        window.location.reload()
+                    }
+                    else if (result.code == 201) {
+                        alert('已刪除')
+                        window.localStorage.setItem('mfit_cartlist', JSON.stringify(result.data.cart_list));
+                        window.location.reload()
+                    }
+                    else if (result.code == 403) {
+                        alert(result.error)
+                        window.location.href = 'http://127.0.0.1:5000/login';
+                    }
+                    else {
+                        alert('請稍後再試！！')
+                    }
+                }
+            })
+        }
+    </script>
+</head>
+
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>廠商合作</title>
+    <link rel="stylesheet" href="../static/css/vendor.css">
+    <script src="../static/js/jquery.min.js" type="text/javascript"></script>
+    <script src="../static/js/common.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        document.onclick = function () {
+            var obj = event.srcElement || event.target;
+            if (obj.tagName == "INPUT" && obj.className == "del_item") {
+                var item_id = obj.id;
+                var h_tr = item_id + '_item_tr';
+                document.getElementById(h_tr).style.display = 'none';
+                DelItem(item_id);
+            }
+            if (obj.value == "修改" && obj.className == "edit_item") {
+                var item_id = obj.name;
+                var td1 = item_id + '_num_td';
+                var td1_text = document.getElementById(td1).innerHTML;
+                document.getElementById(td1).innerHTML = "<input type='text' value='" + td1_text + "'' class='item_num' maxlength='6' required>";
+                var td2 = item_id + '_name_td';
+                var td2_text = document.getElementById(td2).innerHTML;
+                document.getElementById(td2).innerHTML = "<input type='text' value='" + td2_text + "'' class='item_name' required>";
+                var td3 = item_id + '_price_td';
+                var td3_text = document.getElementById(td3).innerText;
+                document.getElementById(td3).innerHTML = "<input type='text' value='" + td3_text + "'' class='item_price' required>";
+                var td4 = item_id + '_class_td';
+                var td4_text = document.getElementById(td4).innerText;
+                document.getElementById(td4).innerHTML = '<select id="item_class" size="1" required><option value="' + td4_text + '"selected>' + td4_text + '</option><option value="外套">外套</option><option value="帽T">帽T</option><option value="長袖">長袖</option><option value="短袖">短袖</option><option value="背心">背心</option><option value="長褲">長褲</option><option value="短褲">短褲</option><option value="帽子">帽子</option><option value="襪子">襪子</option><option value="背包">背包</option></select>';
+                var td6 = item_id + '_amount_td';
+                var td6_text = document.getElementById(td6).innerHTML;
+                document.getElementById(td6).innerHTML = "<input type='text' value='" + td6_text + "'' class='item_amount' required>";
+                var btn1 = item_id + '_edit_btn';
+                document.getElementById(btn1).style.display = 'none';
+                var btn2 = item_id + '_confirm';
+                document.getElementById(btn2).style.display = 'inline-block';
+            }
+            if (obj.value == "確認" && obj.className == "confirm") {
+                var item_id = obj.name;
+                EditItem(item_id);
+            }
+        }
+
+    </script>
+    <script charset="utf-8">
+        var html_body = '';
+        token = window.localStorage.getItem('mfit_token'); //獲取token
+        username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+
+        $.ajax({
+            type: "get",
+            url: "http://127.0.0.1:8000/v1/vendor/products",
+            beforeSend: function (request) {
+                request.setRequestHeader("Authorization", token);
+            },
+            success: function (result) {
+                if (result.code == 200) {
+                    var allproducts = result.data.all_products;
+
+                    header_html = makeHeader(token);
+                    html_body += header_html;
+
+                    html_body += '<main>';
+                    html_body += '<div id="vendor_list">';
+                    html_body += '<h1>商品清單</h1>';
+                    html_body += '<table><tr>';
+                    html_body += '<th style="width: 200px;">商品圖片</th>';
+                    html_body += '<th style="width: 110px;">商品編號</th>';
+                    html_body += '<th style="width: 400px;">商品名稱</th>';
+                    html_body += '<th style="width: 80px;">售價</th>';
+                    html_body += '<th style="width: 80px;">庫存量</th>';
+                    html_body += '<th style="width: 80px;">類別</th>';
+                    html_body += '<th style="width: 65px;"></th><th style="width: 65px;"></th></tr>';
+
+                    for (var y in allproducts) {
+                        var id = allproducts[y].id
+                        var item_name = allproducts[y].item_name
+                        var item_num = allproducts[y].item_num
+                        var price = allproducts[y].price
+                        var pic = allproducts[y].pic
+                        var item_class = allproducts[y].item_class
+                        var item_amount = allproducts[y].item_amount
+
+                        html_body += '<tr id="' + id + '_item_tr"><td><img src="http://127.0.0.1:8000/media/' + pic + '"></td>';
+                        html_body += '<td id="' + id + '_num_td" maxlength="6">' + item_num + '</td>';
+                        html_body += '<td id="' + id + '_name_td">' + item_name + '</td>';
+                        html_body += '<td id="' + id + '_price_td"><strong>' + price + '</strong></td>';
+                        html_body += '<td id="' + id + '_amount_td">' + item_amount + '</td>';
+                        html_body += '<td id="' + id + '_class_td">' + item_class + '</td>';
+                        html_body += '<td><input type="button" value="修改" id="' + id + '_edit_btn"name="' + id + '"class="edit_item"><input type="button" value="確認" id="' + id + '_confirm" name="' + id + '" class="confirm" style="display: none;" ></td>';
+                        html_body += '<td><input type="button" value="刪除" id="' + id + '" class="del_item"></td></tr>';
+                    }
+                    html_body += '<tr><td id="new_pic"><label><input type="file" name="add_pic" id="add_pic"><b>上傳圖片</b></label><input type="button" value="確認" id="pic_confirm" onclick="AddItemPic()""></td>';
+                    html_body += '<td><input type="text" id="item_num" class="item_num" required></td>';
+                    html_body += '<td><input type="text" id="item_name" class="item_name" required></td>';
+                    html_body += '<td><input type="text" id="item_price" class="item_price" required></td>';
+                    html_body += '<td><input type="text" id="item_amount" class="item_amount" required></td>';
+                    html_body += '<td><select id="item_class" size="1" required><option value="外套" selected>外套</option><option value="帽T">帽T</option><option value="長袖">長袖</option><option value="短袖">短袖</option><option value="背心">背心</option><option value="長褲">長褲</option><option value="短褲">短褲</option><option value="帽子">帽子</option><option value="襪子">襪子</option><option value="背包">背包</option></select></td>';
+                    html_body += '<td><input type="button" value="新增" id="add_item" onclick="AddItem()"></td>';
+                    html_body += '<td></td></tr></table></div>';
+                    html_body += '</main>';
+                    $('body').html(html_body);
+                }
+                else if (result.code == 403) {
+                    alert(result.error)
+                    window.location.href = 'http://127.0.0.1:5000/login';
+                }
+                else if (result.code == 10111) {
+                    alert(result.error)
+                    window.location.href = 'http://127.0.0.1:5000/vendor_regist';
+                }
+                else {
+                    alert(result.error);
+                }
+            }
+        });
+        //<!-- 刪除商品-->
+        function DelItem(item_id) {
+            token = window.localStorage.getItem('mfit_token'); //獲取token
+            username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+            var item_id = { 'id': item_id }; //獲取id
+
+            $.ajax({
+                type: "delete",
+                contentType: "application/json",
+                dataType: "json",
+                url: "http://127.0.0.1:8000/v1/vendor/del_item",
+                data: JSON.stringify(item_id),
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", token);
+                },
+                success: function (result) {
+                    if (result.code == 200) {
+                        alert('已刪除該商品！')
+                    }
+                    else if (result.code == 403) {
+                        alert(result.error)
+                        window.location.href = 'http://127.0.0.1:5000/login';
+                    }
+                    else {
+                        alert('請稍後再試！！')
+                    }
+                }
+            })
+        }
+        //<!-- 修改商品-->
+        function EditItem(item_id) {
+            token = window.localStorage.getItem('mfit_token'); //獲取token
+            username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+            var num = item_id + '_num_td'
+            var name = item_id + '_name_td'
+            var price = item_id + '_price_td'
+            var amount = item_id + '_amount_td'
+            var iclass = item_id + '_class_td'
+
+
+            new_num = document.getElementById(num).firstChild.value;
+            new_name = document.getElementById(name).firstChild.value;
+            new_price = document.getElementById(price).firstChild.value;
+            new_amount = document.getElementById(amount).firstChild.value;
+            new_class = document.getElementById(iclass).firstChild.value;
+
+            var post_data = { "id": item_id, "item_num": new_num, "item_name": new_name, "item_price": new_price, "item_amount": new_amount, "item_class": new_class };
+
+            $.ajax({
+                type: "put",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(post_data),
+                url: "http://127.0.0.1:8000/v1/vendor/edit_item",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", token);
+                },
+                success: function (result) {
+                    if (result.code == 200) {
+                        alert("商品修改成功！！")
+                        window.location.reload()
+                    }
+                    else if (result.code == 403) {
+                        alert(result.error)
+                        window.location.href = 'http://127.0.0.1:5000/login';
+                    }
+                    else {
+                        alert(result.error)
+                    }
+                }
+            })
+        }
+        //<!-- 新增商品圖片-->
+        function AddItemPic() {
+            token = window.localStorage.getItem('mfit_token'); //獲取token
+            username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+            formdata = new FormData();
+            formdata.append("add_pic", $("#add_pic")[0].files[0]);
+
+            $.ajax({
+                processData: false,
+                contentType: false,
+                url: "http://127.0.0.1:8000/v1/vendor/add_item_pic",
+                type: 'post',
+                data: formdata,
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", token);
+                },
+                success: function (result) {
+                    if (result.code == 200) {
+                        // alert('成功！')
+                        document.getElementById("new_pic").innerHTML = "<img src='http://127.0.0.1:8000/media/" + result.new_pic + "'>";
+                    }
+                    else if (result.code == 403) {
+                        alert(result.error)
+                        window.location.href = 'http://127.0.0.1:5000/login';
+                    }
+                    else {
+                        alert('失败！')
+                    }
+                }
+            })
+        }
+        //<!-- 新增商品-->
+        function AddItem() {
+            token = window.localStorage.getItem('mfit_token'); //獲取token
+            username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+            var num = $('#item_num').val();
+            var name = $('#item_name').val();
+            var price = $('#item_price').val();
+            var amount = $('#item_amount').val();
+            var iclass = $('#item_class').val();
+            var post_data = { "item_num": num, "item_name": name, "item_price": price, "item_amount": amount, "item_class": iclass };
+            $.ajax({
+                type: "post",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(post_data),
+                url: "http://127.0.0.1:8000/v1/vendor/add_item",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", token);
+                },
+                success: function (result) {
+                    if (result.code == 200) {
+                        alert("新增商品成功")
+                        window.location.reload()
+
+                    }
+                    else {
+                        alert(result.error)
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+
+</html>

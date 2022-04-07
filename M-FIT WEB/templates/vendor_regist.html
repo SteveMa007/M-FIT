@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>廠商註冊</title>
+    <link rel="stylesheet" href="../static/css/vendor_regist.css">
+    <script src="../static/js/jquery.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <header>
+        <nav id="nav1">
+            <a href="/index" id="logo">
+                <h1>個人電商</h1>
+            </a>
+        </nav>
+    </header>
+    <div id="div1">
+        <div id="div2">
+            <h2>電商合作</h2>
+            <p>公司名稱：<input type="text" id="company" placeholder="請輸入公司名稱" required></p>
+            <p>統一編號：<input type="text" id="company_num" placeholder="請輸入統一編號" maxlength="8" required></p>
+            <p>　聯絡人：<input type="text" id="contact_name" placeholder="請輸入姓名" required></p>
+            <p>公司電話：<input type="text" id="contact_tel" placeholder="(ex:02-2626-1234)" required></p>
+            <p>電話分機：<input type="text" id="tel_ext" placeholder="(ex:#1234)"></p>
+            <p></p>
+            <input type="button" value="註冊成為合作夥伴" onclick="VendorRegist()">
+        </div>
+    </div>
+</body>
+<script>
+    token = window.localStorage.getItem('mfit_token'); //獲取token
+    username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+
+    function VendorRegist() {
+        var company = $('#company').val();
+        var company_num = $('#company_num').val();
+        var contact_name = $('#contact_name').val();
+        var contact_tel = $('#contact_tel').val();
+        var tel_ext = $('#tel_ext').val();
+        var post_data = { "company": company, "company_num": company_num, "contact_name": contact_name, "contact_tel": contact_tel, "tel_ext": tel_ext };
+
+        $.ajax({
+            type: "post",
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(post_data),
+            url: "http://127.0.0.1:8000/v1/vendor/register",
+            beforeSend: function (request) {
+                request.setRequestHeader("Authorization", token);
+            },
+            success: function (result) {
+                if (result.code == 200) {
+                    alert("註冊成功並自動跳轉至合作頁面")
+                    window.location.href = 'http://127.0.0.1:5000/vendor';
+                }
+                else if (result.code == 403) {
+                    alert(result.error)
+                    window.location.href = 'http://127.0.0.1:5000/login';
+                }
+                else {
+                    alert(result.error)
+                }
+            }
+        })
+    }
+</script>
+
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>M-FIT首頁</title>
+    <link rel="stylesheet" href="../static/css/index.css">
+    <script src="../static/js/jquery.min.js" type="text/javascript"></script>
+    <script src="../static/js/common.js" type="text/javascript"></script>
+    <script>
+        document.onclick = function () {
+            var obj = event.srcElement || event.target;
+            if (obj.className == 'items_img') {
+                var item_id = obj.id.split('_')[0]
+                var url = "http://127.0.0.1:5000/item/" + item_id
+                window.open(url)
+            }
+            if (obj.className == 'favor_btn') {
+                var item_id = obj.id.split('_')[0]
+                document.getElementById(obj.id).className = 'del_favor';
+                $('#add_favor_alert').show().delay(1500).fadeOut();
+                addFavor(item_id);
+                return false;
+            }
+            if (obj.className == 'del_favor') {
+                var item_id = obj.id.split('_')[0]
+                document.getElementById(obj.id).className = 'favor_btn';
+                $('#del_favor_alert').show().delay(1500).fadeOut();
+                delFavor(item_id);
+                return false;
+            }
+        };
+    </script>
+    <script charset="utf-8">
+        var html_body = '';
+        token = window.localStorage.getItem('mfit_token'); //獲取token
+        username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+        //index//index?c='XX'
+        var url = document.location.toString();
+        var query_split = url.split('?');
+        var query_set = '';
+        if (query_split.length > 1) {
+            query_set = "?" + query_split[1];//kw='xxx'//c='XX'
+        }
+        if (query_set) {
+            var get_url = "http://127.0.0.1:8000/v1/index" + query_set
+        } else {
+            var get_url = "http://127.0.0.1:8000/v1/index"
+        }
+        console.log(query_set)
+        $.ajax({
+            type: "get",
+            url: get_url,
+            beforeSend: function (request) {
+                request.setRequestHeader("Authorization", token);
+            },
+            success: function (result) {
+                if (result.code == 200) {
+                    var showitems = result.data.show_items;
+                    var favor_list = result.data.favor_list;
+
+                    //header
+                    html_body += '<header>';
+                    html_body += '<nav id="nav1">';
+                    html_body += '<a href="/index" id="logo"><h1>個人電商</h1></a>';
+                    html_body += '<div class="header_btn">';
+                    if (result.token) {
+                        html_body += '<b>Hi~' + username + '</b>';
+                    }
+                    html_body += '<a href="/cart">購物車</a>';
+                    if (result.token) {
+                        html_body += '<a href="#" onclick="logOut()">登出</a>';
+                    } else {
+                        html_body += '<a href="/register">註冊</a>';
+                        html_body += '<a href="/login">登入</a>';
+                    }
+                    html_body += '</div>';
+                    html_body += '</nav>';
+                    html_body += ' <nav id="nav2">';
+                    html_body += ' <!--搜尋框-->';
+                    html_body += '<form action="/search" id="index_form">';
+                    html_body += '<input type="text" name="kw" placeholder="輸入您想找的商品" style="width: 300px;height:30px">';
+                    html_body += '<input type="submit" value="搜尋">';
+                    html_body += '</form>';
+                    html_body += '<div class="header_btn">';
+                    if (result.permission == 'manager') {
+                        html_body += '<a href="/manager">管理後台</a>';
+                    }
+                    html_body += '<a href="/vendor">廠商合作</a>';
+                    html_body += '<a href="/usercenter">顧客中心</a>';
+                    html_body += '</div>';
+                    html_body += '</nav>';
+                    html_body += '</header>';
+                    //main
+                    html_body += '<main>';
+                    html_body += '<!--商品分類-->';
+                    html_body += '<div id="class_div">';
+                    html_body += '<ul class="items_class">';
+                    html_body += '<li><a href="/index?c=外套">外套</a></li>';
+                    html_body += '<li><a href="/index?c=帽T">連帽</a></li>';
+                    html_body += '<li><a href="/index?c=長袖">長袖</a></li>';
+                    html_body += '<li><a href="/index?c=短袖">短袖</a></li>';
+                    html_body += '<li><a href="/index?c=背心">背心</a></li><br>';
+                    html_body += '<li><a href="/index?c=長褲">長褲</a></li>';
+                    html_body += '<li><a href="/index?c=短褲">短褲</a></li>';
+                    html_body += '<li><a href="/index?c=帽子">帽子</a></li>';
+                    html_body += '<li><a href="/index?c=襪子">襪子</a></li>';
+                    html_body += '<li><a href="/index?c=背包">背包</a></li>';
+                    html_body += '</ul></div>';
+                    html_body += '<!--商品列表-->';
+                    html_body += '<div id="items_list">';
+                    for (var i in showitems) {
+                        var item_id = showitems[i].id;
+                        var item_pic = showitems[i].item_pic;
+                        var item_name = showitems[i].item_name;
+                        var item_price = showitems[i].item_price;
+
+                        html_body += '<div class="items" >';
+                        html_body += '<img id ="' + item_id + '_img" class="items_img" src="http://127.0.0.1:8000/media/' + item_pic + '">';
+                        html_body += '<h3>' + item_name + '</h3>';
+                        html_body += '<h2>NT$ ' + item_price + '</h2>';
+                        var isFavorite = false;
+                        if (result.token) {
+                            for (a = 0; a < favor_list.length; a++) {
+                                var favor_id = favor_list[a];
+                                if (item_id == favor_id) {
+                                    html_body += '<a href="#" class="del_favor" id="' + item_id + '_favor">收藏</a>';
+                                    isFavorite = true;
+                                }
+                            }
+                            if (!isFavorite) {
+                                html_body += '<a href="#" class="favor_btn" id="' + item_id + '_favor">收藏</a>';
+                            }
+                        }
+                        html_body += '</div>';
+                    }
+                    html_body += '</div></main>';
+                    html_body += '<div id="add_favor_alert">已成功收藏此商品!!</div>';
+                    html_body += '<div id="del_favor_alert">已取消收藏此商品!!</div>';
+                    $('body').html(html_body);
+                } else {
+                    alert(result.error)
+                }
+            }
+        });
+        function addFavor(item_id) {
+            token = window.localStorage.getItem('mfit_token'); //獲取token
+            username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+            var post_data = { 'item_id': item_id, 'id': '' }
+
+            $.ajax({
+                type: "put",
+                url: "http://127.0.0.1:8000/v1/users/" + username + "/add_favor",
+                data: JSON.stringify(post_data),
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", token);
+                },
+                success: function (result) {
+                    if (result.code == 200) {
+                        // alert('成功！！')
+                    }
+                    else {
+                        alert(result.error)
+                    }
+                }
+            });
+        }
+        function delFavor(item_id) {
+            token = window.localStorage.getItem('mfit_token'); //獲取token
+            username = window.localStorage.getItem('mfit_user'); //登陸的用戶名
+            var post_data = { 'item_id': item_id, 'id': '' }
+
+            $.ajax({
+                type: "put",
+                url: "http://127.0.0.1:8000/v1/users/" + username + "/del_favor",
+                data: JSON.stringify(post_data),
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", token);
+                },
+                success: function (result) {
+                    if (result.code == 200) {
+                        // alert('成功！！')
+                    }
+                    else {
+                        alert(result.error)
+                    }
+                }
+            });
+        };
+    </script>
+</head>
+
+</html>

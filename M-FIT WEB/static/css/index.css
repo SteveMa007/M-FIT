@@ -1,0 +1,148 @@
+/* 清除页面元素默认样式 */
+body,h1,h2,h3,h4,h5,h6,ul,ol,li{
+    padding: 0;
+    margin: 0;
+}
+ul,ol{
+    list-style: none;
+}
+a,a:hover{
+    text-decoration: none;
+}
+
+header{
+    width:100%;
+    background-color:#333;
+    top:0;
+}
+#nav1{
+    width:1300px;
+    height:120px;
+    /* 塊元素水平居中 */
+    margin: 0 auto;
+    line-height: 120px;
+    /* 为后面的元素做定位 */
+    position: relative;
+}
+#logo{
+    float:left;
+    font-size:40px;
+    color:#aaa;
+}
+.header_btn{
+    float:right;
+    height:40px;
+}
+.header_btn>a{
+    font-size:20px;
+    color:#bbb;
+    margin-left:20px;
+    padding:2px;
+    border-style:solid;
+    border-radius:5px;
+}
+.header_btn>b{
+    font-size:28px;
+    color:#bbb;
+}
+#nav2{
+    width:1300px;
+    height:60px;
+    /* 塊元素水平居中 */
+    margin: 0 auto;
+    line-height: 60px;
+    /* 为后面的元素做定位 */
+    position: relative;
+}
+#index_form{
+    float:left;
+    font-size: 20px;
+}
+#index_form>input{
+    font-size: 20px;
+}
+main{
+    width: 100%;
+    
+}
+#class_div{
+    margin: 0 auto;
+    text-align: center;
+}
+.items_class{
+    overflow: hidden;
+    margin: 40px 0 0 0;
+    display: inline-block;
+}
+.items_class li{
+    font-size: 32px;
+    float:left;
+    padding: 30px 40px;
+    border-style:solid;
+    border-radius:15px;
+    border-color: #97CBFF;
+    margin: 10px 30px;
+    background-color: #444;
+}
+.items_class li a{
+    color: #5ea6ee;
+}
+#items_list{
+    width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+.items{
+    width: 320px;
+    position: relative;
+    display: inline-block;
+    margin: 15px 30px;
+}
+.items h3{
+    font-weight: normal;
+}
+.items_img{
+    width: 90%;
+    cursor: pointer;
+}
+.favor_btn{
+    border-style: none;
+    border-radius:5px;
+    padding: 3px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1;
+    font-family: 微軟正黑體;
+    color: #ece038;
+    background-color: #666;
+}
+.del_favor{
+    border-style: none;
+    border-radius:5px;
+    padding: 3px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1;
+    font-family: 微軟正黑體;
+    color: #eb2d4d;
+    background-color: #9996;
+}
+#add_favor_alert, #del_favor_alert{
+    width: 300px;
+    background-color: #aaa;
+    color: #145ca5;
+    border-style: solid;
+    border-radius: 10px;
+    padding: 50px 30px;
+    z-index: 1;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    font-size: 30px;
+    text-align: center;
+    margin-top: -75px;
+    margin-left: -183px;
+    display: none;
+}

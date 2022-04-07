@@ -1,0 +1,116 @@
+/* 清除页面元素默认样式 */
+body,h1,h2,h3,h4,h5,h6,ul,ol,li,p,input{
+    padding: 0;
+    margin: 0;
+}
+ul,ol{
+    list-style: none;
+}
+a,a:hover{
+    text-decoration: none;
+}
+
+header{
+    width:100%;
+    background-color:#333;
+    top:0;
+    z-index: 1;
+    position: fixed;
+}
+#nav1{
+    width:1300px;
+    height:120px;
+    margin: 0 auto;
+    line-height: 120px;
+    /* 为后面的元素做定位 */
+    position: relative;
+}
+#logo{
+    float:left;
+    font-size:40px;
+    color:#aaa;
+}
+main{
+    width: 100%;
+    position: absolute;
+    margin: 120px 0 0 0;
+}
+main>div{
+    float: right;
+    width: 50%;
+}
+#cart_list{
+    background-color: #eee;
+    position: fixed;
+    height: 100%;
+}
+#cart_list table{
+    margin: 30px 80.5px;
+    align-items: center;
+    border-spacing: 20px;
+    table-layout: fixed;
+    border-bottom:1px #aaa solid ;
+}
+tr td,tr th{
+    text-align: center;
+    font-size: 18px;
+}
+#cart_list>div{
+    margin: 15px 60px;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+#cart_list>a{
+    font-size: 22px;
+    padding: 15px 40px;
+    border-style:solid;
+    border-radius:10px;
+    border-color: #97CBFF;
+    margin: 10px 30px;
+    background-color: #444;
+    color: #5ea6ee;
+    float: left;
+}
+#order_option>h3{
+    margin: 20px 50px;
+    font-size: 28px;
+}
+#order_option>p{
+    margin: 30px 75px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+}
+p>input[type='radio']{
+    height: 20px;
+    width: 20px;
+    margin: 5px;
+}
+p>input[type='text']{
+    height: 28px;
+    width: 400px;
+    margin: 3px;
+    font-size: 22px;
+}
+p>input[type='checkbox']{
+    margin: 3px;
+}
+p>textarea{
+    height: 56px;
+    width: 400px;
+    margin: 3px;
+    font-size: 22px;
+}
+#order_option>a{
+    font-size: 22px;
+    float: right;
+    padding: 15px 40px;
+    border-style:solid;
+    border-radius:10px;
+    border-color: #97CBFF;
+    margin: 10px 30px 30px 30px;
+    background-color: #444;
+    color: #5ea6ee;
+}
