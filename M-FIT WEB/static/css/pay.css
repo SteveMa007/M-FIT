@@ -1,0 +1,78 @@
+/* 清除页面元素默认样式 */
+body,h1,h2,h3,h4,h5,h6,ul,ol,li{
+    padding: 0;
+    margin: 0;
+}
+ul,ol{
+    list-style: none;
+}
+a,a:hover{
+    text-decoration: none;
+}
+
+header{
+    width:100%;
+    background-color:#333;
+    top:0;
+}
+#nav1{
+    width:1300px;
+    height:120px;
+    /* 塊元素水平居中 */
+    margin: 0 auto;
+    line-height: 120px;
+    /* 为后面的元素做定位 */
+    position: relative;
+}
+#logo{
+    float:left;
+    font-size:40px;
+    color:#aaa;
+}
+.header_btn{
+    float:right;
+    height:40px;
+}
+.header_btn>a{
+    font-size:20px;
+    color:#bbb;
+    margin-left:20px;
+    padding:2px;
+    border-style:solid;
+    border-radius:5px;
+}
+.header_btn>b{
+    font-size:28px;
+    color:#bbb;
+}
+#nav2{
+    width:1300px;
+    height:60px;
+    /* 塊元素水平居中 */
+    margin: 0 auto;
+    line-height: 60px;
+    /* 为后面的元素做定位 */
+    position: relative;
+}
+#index_form{
+    float:left;
+    font-size: 20px;
+}
+#index_form>input{
+    font-size: 20px;
+}
+main{
+    width: 100%;
+    
+}
+.result{
+    width: 50%;
+    font-size: 24px;
+    margin: 70px auto;
+    border-style: solid;
+    border-radius: 15px;
+    text-align: center;
+}
+.result h1{
+    margin: 30px 0;
+}
